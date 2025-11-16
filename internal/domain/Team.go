@@ -5,29 +5,19 @@ type Team struct {
 	Members  []User
 }
 
-func NewTeam(teamName string, members []User) *Team {
+func NewTeam(teamName string, members []User) (*Team, error) {
+	if err := ValidateTeamName(teamName); err != nil {
+		return nil, err
+	}
 	return &Team{
 		TeamName: teamName,
 		Members:  members,
-	}
+	}, nil
 }
 
-func (t *Team) ActiveMembers() []User {
-	activeMembers := make([]User, 0, len(t.Members))
-	for _, member := range t.Members {
-		if member.IsActive {
-			activeMembers = append(activeMembers, member)
-		}
+func ValidateTeamName(teamName string) error {
+	if teamName == "" {
+		return ErrEmptyTeamName
 	}
-	return activeMembers
-}
-
-func (t *Team) NotActiveMembers() []User {
-	notActiveMembers := make([]User, 0, len(t.Members))
-	for _, member := range t.Members {
-		if !member.IsActive {
-			notActiveMembers = append(notActiveMembers, member)
-		}
-	}
-	return notActiveMembers
+	return nil
 }

@@ -11,18 +11,18 @@ const (
 	PullRequestStatusMERGED PullRequestStatus = "MERGED"
 )
 
-type pullRequestId string
+type PullRequestId string
 type PullRequest struct {
-	PullRequestId     pullRequestId
+	PullRequestId     PullRequestId
 	PullRequestName   string
-	AuthorId          userId
+	AuthorId          UserId
 	Status            PullRequestStatus
-	AssignedReviewers []userId
+	AssignedReviewers []UserId
 	CreatedAt         time.Time
 	MergedAt          time.Time
 }
 
-func NewPullRequest(pullRequestId pullRequestId, pullRequestName string, authorId userId, assignedReviewers []userId) (*PullRequest, error) {
+func NewPullRequest(pullRequestId PullRequestId, pullRequestName string, authorId UserId, assignedReviewers []UserId) (*PullRequest, error) {
 	if err := ValidatePullRequestFields(pullRequestId, pullRequestName, authorId, assignedReviewers); err != nil {
 		return nil, err
 	}
@@ -36,17 +36,19 @@ func NewPullRequest(pullRequestId pullRequestId, pullRequestName string, authorI
 		MergedAt:          time.Time{},
 	}, nil
 }
-func (pr *PullRequest) Merge() error {
+
+// если изменился статус -> true
+func (pr *PullRequest) Merge() bool {
 	if pr.Status == PullRequestStatusMERGED {
-		return ErrPullRequestMerged
+		return false
 	}
 
 	pr.Status = PullRequestStatusMERGED
 	pr.MergedAt = time.Now()
-	return nil
+	return true
 }
 
-func (pr *PullRequest) ReplaceReviewer(oldReviewerId, newReviewerId userId) error {
+func (pr *PullRequest) ReplaceReviewer(oldReviewerId, newReviewerId UserId) error {
 	if pr.Status == PullRequestStatusMERGED {
 		return ErrPullRequestMerged
 	}
@@ -64,7 +66,7 @@ func (pr *PullRequest) ReplaceReviewer(oldReviewerId, newReviewerId userId) erro
 	return ErrNotFoundReviewerInPullRequest
 }
 
-func ValidatePullRequestFields(pullRequestId pullRequestId, pullRequestName string, authorId userId, assignedReviewers []userId) error {
+func ValidatePullRequestFields(pullRequestId PullRequestId, pullRequestName string, authorId UserId, assignedReviewers []UserId) error {
 	if pullRequestId == "" {
 		return ErrEmptyPullRequestID
 	}

@@ -10,6 +10,8 @@ bin/goose:
 	@mkdir bin
 	@GOBIN=$(PWD)/bin go install github.com/pressly/goose/v3/cmd/goose@v3.25.0
 
+#migrate-create: bin/goose
+#	@./bin/goose -dir $(MIGRATION_DIR) create additional_indexes sql
 migrate-up: bin/goose
 	@./bin/goose -dir $(MIGRATION_DIR) postgres "$(POSTGRES_URL)" up
 migrate-down: bin/goose

@@ -1,14 +1,14 @@
 package domain
 
-type userId string
+type UserId string
 type User struct {
-	UserId   userId
+	UserId   UserId
 	Username string
 	TeamName string
 	IsActive bool
 }
 
-func NewUser(userId userId, username, teamName string, active bool) (*User, error) {
+func NewUser(userId UserId, username, teamName string, active bool) (*User, error) {
 	if err := ValidateUserFields(userId, username, teamName); err != nil {
 		return nil, err
 	}
@@ -21,13 +21,17 @@ func NewUser(userId userId, username, teamName string, active bool) (*User, erro
 	}, nil
 }
 
-func (u *User) UpdateUser(username, teamName string, active bool) {
+func (u *User) UpdateUser(username, teamName string, active bool) bool {
+	if err := ValidateUserFields(u.UserId, username, teamName); err != nil {
+		return false
+	}
 	u.Username = username
 	u.TeamName = teamName
 	u.IsActive = active
+	return true
 }
 
-func ValidateUserFields(userId userId, username, teamName string) error {
+func ValidateUserFields(userId UserId, username, teamName string) error {
 	if userId == "" {
 		return ErrEmptyUserID
 	}
