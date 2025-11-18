@@ -27,29 +27,29 @@ erDiagram
     pull_requests ||--o{ pull_request_reviewers : "имеет"
 
     teams {
-        id PK
-        name UNIQUE
+        bigint id PK
+        varchar(255) name
     }
 
     users {
-        id PK
-        username
-        team_id FK
-        is_active
+        varchar(255) id PK
+        varchar(255) username
+        bigint team_id FK
+        varchar(255) is_active
     }
 
     pull_requests {
-        id PK
-        pull_request_name
-        author_id FK
-        status
-        created_at
-        merged_at
+        varchar(255) id PK
+        varchar(255) pull_request_name
+        bigint author_id FK
+        varchar(255) status
+        timestamp created_at
+        timestamp merged_at
     }
 
     pull_request_reviewers {
-        pull_request_id FK
-        reviewer_id FK
+        varchar(255) pull_request_id FK
+        varchar(255) reviewer_id FK
     }
 ```
 ## Допущения
