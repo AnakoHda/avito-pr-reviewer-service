@@ -5,6 +5,7 @@ import (
 	"avito-pr-reviewer-service/internal/generated/api/dto"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 const (
@@ -19,6 +20,7 @@ type UserResponse struct {
 	User dto.User `json:"user"`
 }
 type PullRequestsShortResponse struct {
+	UserId            string                 `json:"user_id"`
 	PullRequestsShort []dto.PullRequestShort `json:"pull_requests"`
 }
 
@@ -31,6 +33,21 @@ type PullRequestCreate struct {
 	AuthorId          string                `json:"author_id"`
 	Status            dto.PullRequestStatus `json:"status"`
 	AssignedReviewers []string              `json:"assigned_reviewers"`
+}
+type PullRequestMergeResponse struct {
+	PR PullRequestWithMergedAt `json:"pr"`
+}
+type PullRequestWithMergedAt struct {
+	PullRequestId     string                `json:"pull_request_id"`
+	PullRequestName   string                `json:"pull_request_name"`
+	AuthorId          string                `json:"author_id"`
+	Status            dto.PullRequestStatus `json:"status"`
+	AssignedReviewers []string              `json:"assigned_reviewers"`
+	MergedAt          *time.Time            `json:"mergedAt"`
+}
+type PullRequestReassignResponse struct {
+	PR       PullRequestCreate `json:"pr"`
+	Replaced string            `json:"replaced_by"`
 }
 
 func FromTeamDTOToTeam(dto dto.Team) (domain.Team, error) {

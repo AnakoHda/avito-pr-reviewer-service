@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"errors"
 	"time"
 )
 
@@ -55,7 +56,11 @@ func (pr *PullRequest) ReplaceReviewer(oldReviewerId, newReviewerId UserId) erro
 	if newReviewerId == pr.AuthorId {
 		return ErrAuthorCannotBeReviewer
 	}
-
+	for _, reviewerId := range pr.AssignedReviewers {
+		if reviewerId == newReviewerId {
+			return errors.New("newReviewer can`t be Actual Reviewer")
+		}
+	}
 	for i, findUserId := range pr.AssignedReviewers {
 		if findUserId == oldReviewerId {
 			pr.AssignedReviewers[i] = newReviewerId

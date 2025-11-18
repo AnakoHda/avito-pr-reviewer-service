@@ -77,38 +77,42 @@ func (s *Service) Merge(ctx context.Context, pullRequestID domain.PullRequestId)
 	return foundedPR, nil
 }
 
-func (s *Service) Reassign(ctx context.Context, pullRequestID domain.PullRequestId, oldReviewerId domain.UserId) (*domain.PullRequest, error) {
+func (s *Service) Reassign(ctx context.Context, pullRequestID domain.PullRequestId, oldReviewerId domain.UserId) (*domain.PullRequest, *domain.UserId, error) {
 	//поиск PR
 	foundedPR, err := s.prRepo.GetPullRequestByID(ctx, pullRequestID)
 	if err != nil {
-		return nil, domain.ErrPullRequestNotFound
+		return nil, nil, domain.ErrPullRequestNotFound
 	}
-	//проверка наличия oldReviewerId в PR, статуса, oldReviewerId != AuthorId
-	if err := foundedPR.ReplaceReviewer(oldReviewerId, oldReviewerId); err != nil {
-		return nil, err
+	//поверка статуса, oldReviewerId != AuthorId
+	if foundedPR.AuthorId == oldReviewerId {
+		return nil, nil, domain.ErrAuthorCannotBeReviewer
+	}
+	if foundedPR.Status == domain.PullRequestStatusMERGED {
+		return nil, nil, domain.ErrPullRequestMerged
 	}
 	//поиск старого User
 	oldUserReviewer, err := s.userRepo.GetUserByID(ctx, oldReviewerId)
 	if err != nil {
-		return nil, domain.ErrUserNotFound
+		return nil, nil, domain.ErrUserNotFound
 	}
 	//ищем в команде oldUserReviewer потенциального рревьювера
 	usersByTeam, err := s.userRepo.ListUsersByTeamName(ctx, oldUserReviewer.TeamName)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	for _, user := range usersByTeam {
 		if !user.IsActive || user.UserId == oldUserReviewer.UserId {
 			continue
 		}
-		if err := foundedPR.ReplaceReviewer(oldReviewerId, user.UserId); err == nil {
-			if err := s.prRepo.UpdatePullRequest(ctx, *foundedPR); err != nil {
-				return nil, err
-			}
-			return foundedPR, nil
+		if err := foundedPR.ReplaceReviewer(oldReviewerId, user.UserId); err != nil {
+			continue
+		}
+		if err := s.prRepo.UpdatePullRequest(ctx, *foundedPR); err != nil {
+			return nil, nil, err
 		}
 
+		return foundedPR, &user.UserId, nil
 	}
-	return nil, domain.ErrNoCandidatesInTeam
+	return nil, nil, domain.ErrNoCandidatesInTeam
 }

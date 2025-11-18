@@ -109,8 +109,8 @@ type PostPullRequestMergeJSONBody struct {
 
 // PostPullRequestReassignJSONBody defines parameters for PostPullRequestReassign.
 type PostPullRequestReassignJSONBody struct {
-	OldUserId     string `json:"old_user_id"`
 	PullRequestId string `json:"pull_request_id"`
+	OldUserId     string `json:"old_user_id"`
 }
 
 // GetTeamGetParams defines parameters for GetTeamGet.

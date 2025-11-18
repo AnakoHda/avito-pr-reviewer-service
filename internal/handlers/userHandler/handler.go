@@ -68,6 +68,7 @@ func (h *Handler) GETGetReviewUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var res handlers.PullRequestsShortResponse
+	res.UserId = userId
 	res.PullRequestsShort = make([]dto.PullRequestShort, 0, len(massPR))
 	for _, pr := range massPR {
 		res.PullRequestsShort = append(res.PullRequestsShort, dto.PullRequestShort{
