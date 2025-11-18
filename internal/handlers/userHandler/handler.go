@@ -23,22 +23,19 @@ func New(svc Service) *Handler {
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("/users/serIsActive", h.POSTSetIsActiveUser)
+	mux.HandleFunc("/users/setIsActive", h.POSTSetIsActiveUser)
 	mux.HandleFunc("/users/getReview", h.GETGetReviewUser)
 }
 
 func (h *Handler) POSTSetIsActiveUser(w http.ResponseWriter, r *http.Request) {
-	var req dto.PostUsersSetIsActiveJSONBody
 	slog.Info("Touch SetIsActive USERS")
+	var req dto.PostUsersSetIsActiveJSONBody
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		handlers.ResponseFormatError(w, http.StatusBadRequest, handlers.ErrBadRequest, "Decode error")
 		return
 	}
-	userId, active := handlers.FromPostUsersSetIsActiveJSONBody(req)
-
 	ctx := r.Context()
-
-	user, err := h.svc.SetIsActive(ctx, userId, active)
+	user, err := h.svc.SetIsActive(ctx, domain.UserId(req.UserId), req.IsActive)
 	if err != nil {
 		if err.Error() == domain.ErrUserNotFound.Error() {
 			handlers.ResponseFormatError(w, http.StatusNotFound, dto.NOTFOUND, "resource not found")
@@ -48,7 +45,7 @@ func (h *Handler) POSTSetIsActiveUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	dtoUser := handlers.FromUserToUserDTO(*user)
-	handlers.ResponseFormatOK(w, http.StatusOK, dtoUser)
+	handlers.ResponseFormatOK(w, http.StatusOK, handlers.UserResponse{User: dtoUser})
 	return
 }
 

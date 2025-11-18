@@ -9,7 +9,6 @@ func (pgPepo *Repository) GetUserByID(ctx context.Context, userID domain.UserId)
 	const selectUserByIDQ = `
 SELECT u.id,
 	u.username,
-	u.team_id,
 	t.name AS team_name,
 	u.is_active
 FROM users u
@@ -43,7 +42,7 @@ FROM teams
 WHERE name = $1
 `
 	var teamId int
-	err := pgPepo.db.QueryRowContext(ctx, selectTeamIDByTeamNameQ, user).Scan(
+	err := pgPepo.db.QueryRowContext(ctx, selectTeamIDByTeamNameQ, user.TeamName).Scan(
 		&teamId,
 	)
 	if err != nil {

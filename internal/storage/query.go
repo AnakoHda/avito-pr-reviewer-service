@@ -59,7 +59,6 @@ const insertOrUpdateUserQ = `
 const selectUserByIDQ = `
 SELECT u.id,
 	u.username,
-	u.team_id,
 	t.name AS team_name,
 	u.is_active
 FROM users u

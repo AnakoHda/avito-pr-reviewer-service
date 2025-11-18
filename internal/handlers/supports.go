@@ -15,6 +15,9 @@ const (
 type TeamResponse struct {
 	Team dto.Team `json:"team"`
 }
+type UserResponse struct {
+	User dto.User `json:"user"`
+}
 
 func FromTeamDTOToTeam(dto dto.Team) (domain.Team, error) {
 	var tmpTeam domain.Team
@@ -64,9 +67,7 @@ func ResponseFormatOK(w http.ResponseWriter, httpStatus int, data any) {
 	return
 
 }
-func FromPostUsersSetIsActiveJSONBody(body dto.PostUsersSetIsActiveJSONBody) (domain.UserId, bool) {
-	return domain.UserId(body.UserId), body.IsActive
-}
+
 func FromUserToUserDTO(user domain.User) dto.User {
 	return dto.User{
 		IsActive: user.IsActive,
