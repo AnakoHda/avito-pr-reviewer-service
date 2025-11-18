@@ -21,37 +21,35 @@ docker-compose up
 
 ```mermaid
 erDiagram
-
     teams ||--o{ users : "имеет"
     users ||--o{ pull_requests : "создаёт"
     users ||--o{ pull_request_reviewers : "назначен"
     pull_requests ||--o{ pull_request_reviewers : "имеет"
 
     teams {
-        int id PK
-        text name UNIQUE
+        id PK
+        name UNIQUE
     }
 
     users {
-        text id PK
-        text username
-        int team_id FK
-        boolean is_active
+        id PK
+        username
+        team_id FK
+        is_active
     }
 
     pull_requests {
-        text id PK
-        text pull_request_name
-        text author_id FK
-        pull_request_status status
-        timestamp created_at
-        timestamp merged_at
+        id PK
+        pull_request_name
+        author_id FK
+        status
+        created_at
+        merged_at
     }
 
     pull_request_reviewers {
-        text pull_request_id FK
-        text reviewer_id FK
-        PK pull_request_id, reviewer_id
+        pull_request_id FK
+        reviewer_id FK
     }
 ```
 ## Допущения

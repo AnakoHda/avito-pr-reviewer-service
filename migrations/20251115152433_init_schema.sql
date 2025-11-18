@@ -4,8 +4,8 @@ SELECT 'up SQL query';
 -- +goose StatementEnd
 
 CREATE TABLE IF NOT EXISTS teams (
-                                     id      SERIAL PRIMARY KEY,
-                                     name    TEXT NOT NULL UNIQUE
+    id      SERIAL PRIMARY KEY,
+    name    TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS users (
