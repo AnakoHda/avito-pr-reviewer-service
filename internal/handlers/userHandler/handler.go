@@ -2,7 +2,11 @@ package userHandler
 
 import (
 	"avito-pr-reviewer-service/internal/domain"
+	"avito-pr-reviewer-service/internal/generated/api/dto"
+	"avito-pr-reviewer-service/internal/handlers"
 	"context"
+	"encoding/json"
+	"log/slog"
 	"net/http"
 )
 
@@ -23,6 +27,31 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/users/getReview", h.GETGetReviewUser)
 }
 
-func (h *Handler) POSTSetIsActiveUser(w http.ResponseWriter, r *http.Request) {}
+func (h *Handler) POSTSetIsActiveUser(w http.ResponseWriter, r *http.Request) {
+	var req dto.PostUsersSetIsActiveJSONBody
+	slog.Info("Touch SetIsActive USERS")
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		handlers.ResponseFormatError(w, http.StatusBadRequest, handlers.ErrBadRequest, "Decode error")
+		return
+	}
+	userId, active := handlers.FromPostUsersSetIsActiveJSONBody(req)
 
-func (h *Handler) GETGetReviewUser(w http.ResponseWriter, r *http.Request) {}
+	ctx := r.Context()
+
+	user, err := h.svc.SetIsActive(ctx, userId, active)
+	if err != nil {
+		if err.Error() == domain.ErrUserNotFound.Error() {
+			handlers.ResponseFormatError(w, http.StatusNotFound, dto.NOTFOUND, "resource not found")
+			return
+		}
+		handlers.ResponseFormatError(w, http.StatusInternalServerError, handlers.ErrInternal, "service error")
+		return
+	}
+	dtoUser := handlers.FromUserToUserDTO(*user)
+	handlers.ResponseFormatOK(w, http.StatusOK, dtoUser)
+	return
+}
+
+func (h *Handler) GETGetReviewUser(w http.ResponseWriter, r *http.Request) {
+
+}

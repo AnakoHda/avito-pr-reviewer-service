@@ -68,8 +68,8 @@ type PullRequestShortStatus string
 
 // Team defines model for Team.
 type Team struct {
-	Members  []TeamMember `json:"members"`
 	TeamName string       `json:"team_name"`
+	Members  []TeamMember `json:"members"`
 }
 
 // TeamMember defines model for TeamMember.

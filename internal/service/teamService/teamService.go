@@ -6,7 +6,6 @@ import (
 )
 
 type UsersRepository interface {
-	//CreateAndUpdateUsers(ctx context.Context, users []domain.User) error
 	ListUsersByTeamName(ctx context.Context, teamName string) ([]domain.User, error)
 }
 type TeamRepository interface {

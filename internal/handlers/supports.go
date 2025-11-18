@@ -1,4 +1,4 @@
-package teamHandler
+package handlers
 
 import (
 	"avito-pr-reviewer-service/internal/domain"
@@ -11,6 +11,10 @@ const (
 	ErrBadRequest dto.ErrorResponseErrorCode = "BAD_REQUEST"
 	ErrInternal   dto.ErrorResponseErrorCode = "Internal error"
 )
+
+type TeamResponse struct {
+	Team dto.Team `json:"team"`
+}
 
 func FromTeamDTOToTeam(dto dto.Team) (domain.Team, error) {
 	var tmpTeam domain.Team
@@ -27,7 +31,7 @@ func FromTeamDTOToTeam(dto dto.Team) (domain.Team, error) {
 func FromTeamToDTO(team domain.Team) dto.Team {
 	var tmpTeam dto.Team
 	tmpTeam.TeamName = team.TeamName
-	tmpTeam.Members = make([]dto.TeamMember, len(team.Members))
+	tmpTeam.Members = make([]dto.TeamMember, 0, len(team.Members))
 	for _, member := range team.Members {
 		tmpTeam.Members = append(tmpTeam.Members, dto.TeamMember{
 			UserId:   string(member.UserId),
@@ -59,4 +63,15 @@ func ResponseFormatOK(w http.ResponseWriter, httpStatus int, data any) {
 	_ = json.NewEncoder(w).Encode(data)
 	return
 
+}
+func FromPostUsersSetIsActiveJSONBody(body dto.PostUsersSetIsActiveJSONBody) (domain.UserId, bool) {
+	return domain.UserId(body.UserId), body.IsActive
+}
+func FromUserToUserDTO(user domain.User) dto.User {
+	return dto.User{
+		IsActive: user.IsActive,
+		TeamName: user.TeamName,
+		UserId:   string(user.UserId),
+		Username: user.Username,
+	}
 }

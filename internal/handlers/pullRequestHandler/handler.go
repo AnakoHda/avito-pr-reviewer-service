@@ -25,7 +25,9 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/pullRequest/reassign", h.POSTReassignPullRequest)
 }
 
-func (h *Handler) POSTCreatePullRequest(w http.ResponseWriter, r *http.Request) {}
+func (h *Handler) POSTCreatePullRequest(w http.ResponseWriter, r *http.Request) {
+
+}
 
 func (h *Handler) POSTMergePullRequest(w http.ResponseWriter, r *http.Request) {}
 

@@ -3,6 +3,7 @@ package teamHandler
 import (
 	"avito-pr-reviewer-service/internal/domain"
 	"avito-pr-reviewer-service/internal/generated/api/dto"
+	"avito-pr-reviewer-service/internal/handlers"
 	"context"
 	"encoding/json"
 	"log/slog"
@@ -27,32 +28,53 @@ func (h *Handler) Register(mux *http.ServeMux) {
 }
 
 func (h *Handler) POSTAddTeam(w http.ResponseWriter, r *http.Request) {
-	var req dto.Team
+	var req dto.PostTeamAddJSONRequestBody
 	slog.Info("Touch ADD TEAM")
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		ResponseFormatError(w, http.StatusBadRequest, ErrBadRequest, "Decode error")
+		handlers.ResponseFormatError(w, http.StatusBadRequest, handlers.ErrBadRequest, "Decode error")
 		return
 	}
-	tmpTeam, err := FromTeamDTOToTeam(req)
+	tmpTeam, err := handlers.FromTeamDTOToTeam(req)
 	if err != nil {
-		ResponseFormatError(w, http.StatusBadRequest, ErrBadRequest, "Format error")
+		handlers.ResponseFormatError(w, http.StatusBadRequest, handlers.ErrBadRequest, "Format error")
 		return
 	}
+
 	ctx := r.Context()
 	actualTeam, err := h.svc.AddTeamWithUsers(ctx, tmpTeam)
+
 	if err != nil {
 		if err.Error() == domain.ErrTeamAlreadyExists.Error() {
-			ResponseFormatError(w, http.StatusBadRequest, dto.TEAMEXISTS, "team_name already exists")
+			handlers.ResponseFormatError(w, http.StatusBadRequest, dto.TEAMEXISTS, "team_name already exists")
 			return
 		}
-		ResponseFormatError(w, http.StatusInternalServerError, ErrInternal, "service error")
+		handlers.ResponseFormatError(w, http.StatusInternalServerError, handlers.ErrInternal, "service error")
 		return
 	}
-	responseTeamDTO := FromTeamToDTO(*actualTeam)
-	ResponseFormatOK(w, http.StatusCreated, responseTeamDTO)
+
+	responseTeamDTO := handlers.FromTeamToDTO(*actualTeam)
+	handlers.ResponseFormatOK(w, http.StatusCreated, handlers.TeamResponse{Team: responseTeamDTO})
 	return
 }
 
 func (h *Handler) GETGetTeam(w http.ResponseWriter, r *http.Request) {
-
+	slog.Info("Touch GET TEAM")
+	teamName := r.URL.Query().Get("team_name")
+	if teamName == "" {
+		handlers.ResponseFormatError(w, http.StatusBadRequest, handlers.ErrBadRequest, "Decode error")
+		return
+	}
+	ctx := r.Context()
+	team, err := h.svc.GetTeam(ctx, teamName)
+	if err != nil {
+		if err.Error() == domain.ErrTeamNotFound.Error() {
+			handlers.ResponseFormatError(w, http.StatusNotFound, dto.NOTFOUND, "resource not found")
+			return
+		}
+		handlers.ResponseFormatError(w, http.StatusInternalServerError, handlers.ErrInternal, "service error")
+		return
+	}
+	responseTeamDTO := handlers.FromTeamToDTO(*team)
+	handlers.ResponseFormatOK(w, http.StatusOK, handlers.TeamResponse{Team: responseTeamDTO})
+	return
 }
