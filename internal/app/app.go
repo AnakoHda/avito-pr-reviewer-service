@@ -37,6 +37,9 @@ func Run(ctx context.Context) error {
 	userServ := userService.New(pero, pero)
 
 	ServerPORT := os.Getenv("SERVICE_PORT")
+	if ServerPORT == "" {
+		ServerPORT = "8080"
+	}
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", ServerPORT),

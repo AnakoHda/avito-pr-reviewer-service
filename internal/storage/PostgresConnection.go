@@ -10,10 +10,12 @@ import (
 
 func NewConnection(ctx context.Context) (*sqlx.DB, error) {
 	URL := os.Getenv("POSTGRES_URL")
-	//db, err := sqlx.Connect("postgres", "postgres://authuser:authpass@postgres:5432/authdb?sslmode=disable")
+	if URL == "" {
+		URL = "postgres://authuser:authpass@postgres:5432/authdb?sslmode=disable"
+	}
+
 	slog.Info("Connecting to PostgreSQL: ", URL)
 	db, err := sqlx.Connect("postgres", URL)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
