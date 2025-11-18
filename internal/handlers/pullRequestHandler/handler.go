@@ -2,7 +2,11 @@ package pullRequestHandler
 
 import (
 	"avito-pr-reviewer-service/internal/domain"
+	"avito-pr-reviewer-service/internal/generated/api/dto"
+	"avito-pr-reviewer-service/internal/handlers"
 	"context"
+	"encoding/json"
+	"log/slog"
 	"net/http"
 )
 
@@ -26,7 +30,47 @@ func (h *Handler) Register(mux *http.ServeMux) {
 }
 
 func (h *Handler) POSTCreatePullRequest(w http.ResponseWriter, r *http.Request) {
+	var req dto.PostPullRequestCreateJSONBody
+	slog.Info("Touch CREATE PULL REQUEST")
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		handlers.ResponseFormatError(w, http.StatusBadRequest, handlers.ErrBadRequest, "Decode error")
+		return
+	}
 
+	ctx := r.Context()
+	createdPR, err := h.svc.CreatePullRequest(
+		ctx,
+		domain.PullRequestId(req.PullRequestId),
+		req.PullRequestName, domain.UserId(req.AuthorId),
+	)
+	if err != nil {
+		if err.Error() == domain.ErrUserNotFound.Error() || err.Error() == domain.ErrTeamNotFound.Error() {
+			handlers.ResponseFormatError(w, http.StatusNotFound, dto.NOTFOUND, "resource not found")
+			return
+		}
+		if err.Error() == domain.ErrPullRequestAlreadyExists.Error() {
+			handlers.ResponseFormatError(w, http.StatusConflict, dto.PREXISTS, "PR id already exists")
+			return
+		}
+		handlers.ResponseFormatError(w, http.StatusInternalServerError, handlers.ErrInternal, "service error")
+		return
+	}
+	assigned := make([]string, len(createdPR.AssignedReviewers))
+	for i, reviewer := range createdPR.AssignedReviewers {
+		assigned[i] = string(reviewer)
+	}
+	handlers.ResponseFormatOK(
+		w,
+		http.StatusCreated,
+		handlers.PullRequestResponse{
+			PullRequest: dto.PullRequest{
+				PullRequestId:     string(createdPR.PullRequestId),
+				PullRequestName:   createdPR.PullRequestName,
+				AuthorId:          string(createdPR.AuthorId),
+				Status:            dto.PullRequestStatus(createdPR.Status),
+				AssignedReviewers: assigned,
+			}})
+	return
 }
 
 func (h *Handler) POSTMergePullRequest(w http.ResponseWriter, r *http.Request) {}
