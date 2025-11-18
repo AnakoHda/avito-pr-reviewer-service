@@ -5,7 +5,7 @@ import (
 	"context"
 )
 
-func (pgPepo *PostgresRepository) GetUserByID(ctx context.Context, userID domain.UserId) (*domain.User, error) {
+func (pgPepo *Repository) GetUserByID(ctx context.Context, userID domain.UserId) (*domain.User, error) {
 	const selectUserByIDQ = `
 SELECT u.id,
 	u.username,
@@ -35,7 +35,8 @@ WHERE u.id = $1
 		tmpUser.TeamName, tmpUser.IsActive,
 	)
 }
-func (pgPepo *PostgresRepository) UpdateUser(ctx context.Context, user domain.User) error {
+
+func (pgPepo *Repository) UpdateUser(ctx context.Context, user domain.User) error {
 	const selectTeamIDByTeamNameQ = `
 SELECT id
 FROM teams
@@ -81,51 +82,8 @@ WHERE id = $1
 
 	return nil
 }
-func (pgPepo *PostgresRepository) CreateAndUpdateUsers(ctx context.Context, users []domain.User) error {
-	if len(users) == 0 {
-		return nil
-	}
 
-	tx, err := pgPepo.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	const insertOrUpdateUserQ = `
-INSERT INTO users (id, username, team_id, is_active)
-SELECT $1, $2, t.id, $4
-FROM teams t
-WHERE t.name = $3
-ON CONFLICT (id) DO UPDATE SET
-    username  = EXCLUDED.username,
-    team_id   = EXCLUDED.team_id,
-    is_active = EXCLUDED.is_active
-`
-
-	for _, u := range users {
-		res, err := tx.ExecContext(ctx, insertOrUpdateUserQ,
-			u.UserId,
-			u.Username,
-			u.TeamName,
-			u.IsActive,
-		)
-		if err != nil {
-			return err
-		}
-
-		rows, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if rows == 0 {
-			return domain.ErrTeamNotFound
-		}
-	}
-
-	return tx.Commit()
-}
-func (pgPepo *PostgresRepository) ListUsersByTeamName(ctx context.Context, teamName string) ([]domain.User, error) {
+func (pgPepo *Repository) ListUsersByTeamName(ctx context.Context, teamName string) ([]domain.User, error) {
 	const selectTeamIDByTeamNameQ = `
 SELECT id
 FROM teams

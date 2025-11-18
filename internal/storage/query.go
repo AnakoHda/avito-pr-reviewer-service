@@ -43,6 +43,15 @@ VALUES ($1, $2)
 const insertTeamQ = `
 		INSERT INTO teams (name)
 		VALUES ($1)
+		RETURNING id
+	`
+const insertOrUpdateUserQ = `
+	INSERT INTO users (id, username, team_id, is_active)
+	VALUES ($1, $2, $3, $4)
+	ON CONFLICT (id) DO UPDATE SET
+		username  = EXCLUDED.username,
+		team_id   = EXCLUDED.team_id,
+		is_active = EXCLUDED.is_active
 	`
 
 // users
@@ -64,16 +73,6 @@ SET
     team_id  = $3,
     is_active = $4
 WHERE id = $1
-`
-const insertOrUpdateUserQ = `
-INSERT INTO users (id, username, team_id, is_active)
-SELECT $1, $2, t.id, $4
-FROM teams t
-WHERE t.name = $3
-ON CONFLICT (id) DO UPDATE SET
-    username  = EXCLUDED.username,
-    team_id   = EXCLUDED.team_id,
-    is_active = EXCLUDED.is_active
 `
 const selectTeamIDByTeamNameQ = `
 SELECT id

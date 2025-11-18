@@ -6,11 +6,11 @@ import (
 )
 
 type UsersRepository interface {
-	CreateAndUpdateUsers(ctx context.Context, users []domain.User) error
+	//CreateAndUpdateUsers(ctx context.Context, users []domain.User) error
 	ListUsersByTeamName(ctx context.Context, teamName string) ([]domain.User, error)
 }
 type TeamRepository interface {
-	CreateTeam(ctx context.Context, teamName string) error
+	CreateTeam(ctx context.Context, team domain.Team) error
 }
 type Service struct {
 	userRepo UsersRepository
@@ -24,19 +24,20 @@ func New(usersRepository UsersRepository, teamRepository TeamRepository) *Servic
 	}
 }
 
-func (s *Service) AddTeamWithUsers(ctx context.Context, team domain.Team) error {
+func (s *Service) AddTeamWithUsers(ctx context.Context, team domain.Team) (*domain.Team, error) {
 	// создание команды
-	if err := s.teamRepo.CreateTeam(ctx, team.TeamName); err != nil {
-		return err
+	if err := s.teamRepo.CreateTeam(ctx, team); err != nil {
+		return nil, err
 	}
 
-	if err := s.userRepo.CreateAndUpdateUsers(ctx, team.Members); err != nil {
-		return err
+	recordedUsers, err := s.userRepo.ListUsersByTeamName(ctx, team.TeamName)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return domain.NewTeam(team.TeamName, recordedUsers)
 }
 
-func (s *Service) getTeam(ctx context.Context, teamName string) (*domain.Team, error) {
+func (s *Service) GetTeam(ctx context.Context, teamName string) (*domain.Team, error) {
 	// существует ли команда и получить скисок
 	existedUsersInTeam, err := s.userRepo.ListUsersByTeamName(ctx, teamName)
 	if err != nil {

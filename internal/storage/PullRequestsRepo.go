@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-func (pgPepo *PostgresRepository) ListPullRequestsByReviewerID(ctx context.Context, reviewerID domain.UserId) ([]domain.PullRequest, error) {
+func (pgPepo *Repository) ListPullRequestsByReviewerID(ctx context.Context, reviewerID domain.UserId) ([]domain.PullRequest, error) {
 	//достаём все строки PRID где reviewer_id=reviewerID
 	const selectPullRequestIDsQ = `
 SELECT pull_request_id
@@ -54,7 +54,7 @@ WHERE reviewer_id = $1
 
 	return result, nil
 }
-func (pgPepo *PostgresRepository) GetPullRequestByID(ctx context.Context, pullRequestId domain.PullRequestId) (*domain.PullRequest, error) {
+func (pgPepo *Repository) GetPullRequestByID(ctx context.Context, pullRequestId domain.PullRequestId) (*domain.PullRequest, error) {
 	//достаём PullRequesr из таблицы pull_requests
 	const pullRequestSelectQ = `
 SELECT id, pull_requests_name, author_id, status, created_at, merged_at
@@ -109,7 +109,7 @@ WHERE pull_request_id = $1
 		tmpPR.AuthorId, tmpPR.AssignedReviewers,
 	)
 }
-func (pgPepo *PostgresRepository) CreatePullRequest(ctx context.Context, pullRequest domain.PullRequest) error {
+func (pgPepo *Repository) CreatePullRequest(ctx context.Context, pullRequest domain.PullRequest) error {
 	tx, err := pgPepo.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
@@ -148,7 +148,7 @@ VALUES ($1, $2)
 	return tx.Commit()
 }
 
-func (pgPepo *PostgresRepository) UpdatePullRequest(ctx context.Context, pullRequest domain.PullRequest) error {
+func (pgPepo *Repository) UpdatePullRequest(ctx context.Context, pullRequest domain.PullRequest) error {
 	tx, err := pgPepo.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err

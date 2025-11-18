@@ -7,12 +7,12 @@ import (
 	"github.com/lib/pq"
 )
 
-type PostgresRepository struct {
+type Repository struct {
 	db *sqlx.DB
 }
 
-func NewPostgresRepository(db *sqlx.DB) *PostgresRepository {
-	return &PostgresRepository{db: db}
+func New(db *sqlx.DB) *Repository {
+	return &Repository{db: db}
 }
 
 func IsErrorPGAlreadyExist(err error) bool {

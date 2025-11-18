@@ -1,9 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"avito-pr-reviewer-service/internal/app"
+	"context"
+	"log/slog"
+	"os"
+)
 
 func main() {
-	for {
-		fmt.Println("Hello World")
+	err := app.Run(context.Background())
+	if err != nil {
+		slog.Error("app exited with error: %v", err)
+		os.Exit(1)
 	}
 }
