@@ -62,8 +62,8 @@ func (h *Handler) POSTCreatePullRequest(w http.ResponseWriter, r *http.Request) 
 	handlers.ResponseFormatOK(
 		w,
 		http.StatusCreated,
-		handlers.PullRequestResponse{
-			PullRequest: dto.PullRequest{
+		handlers.PullRequestCreateResponse{
+			PR: handlers.PullRequestCreate{
 				PullRequestId:     string(createdPR.PullRequestId),
 				PullRequestName:   createdPR.PullRequestName,
 				AuthorId:          string(createdPR.AuthorId),

@@ -18,11 +18,19 @@ type TeamResponse struct {
 type UserResponse struct {
 	User dto.User `json:"user"`
 }
-type PullRequestsShort struct {
+type PullRequestsShortResponse struct {
 	PullRequestsShort []dto.PullRequestShort `json:"pull_requests"`
 }
-type PullRequestResponse struct {
-	PullRequest dto.PullRequest `json:"pr"`
+
+type PullRequestCreateResponse struct {
+	PR PullRequestCreate `json:"pr"`
+}
+type PullRequestCreate struct {
+	PullRequestId     string                `json:"pull_request_id"`
+	PullRequestName   string                `json:"pull_request_name"`
+	AuthorId          string                `json:"author_id"`
+	Status            dto.PullRequestStatus `json:"status"`
+	AssignedReviewers []string              `json:"assigned_reviewers"`
 }
 
 func FromTeamDTOToTeam(dto dto.Team) (domain.Team, error) {
