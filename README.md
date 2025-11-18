@@ -17,9 +17,43 @@
 docker-compose up
 ```
 ***
+## 📊 Схема базы данных
 
+```mermaid
+erDiagram
+  teams ||--o{ users : "имеет"
+  users ||--o{ pull_requests : "создаёт"
+  users ||--o{ pull_request_reviewers : "назначен"
+  pull_requests ||--o{ pull_request_reviewers : "имеет"
+  
+      teams {
+          int id PK
+          text name UNIQUE
+      }
+  
+      users {
+          text id PK
+          text username
+          int team_id FK
+          boolean is_active
+      }
+  
+      pull_requests {
+          text id PK
+          text pull_request_name
+          text author_id FK
+          pull_request_status status
+          timestamp created_at
+          timestamp merged_at
+      }
+  
+      pull_request_reviewers {
+          text pull_request_id FK
+          text reviewer_id FK
+          PK (pull_request_id, reviewer_id)
+      }
+```
 ## Допущения
-
 * Отсутствие какой-либо валидации имён и ID (только не пустые)
 
 
@@ -30,7 +64,7 @@ docker-compose up
   * -> при /pullRequest/reassign нет проверки, что автор уже существующего PullReq относится к одной и той же группе, что и изменяемый (old_reviewer_id), новый ищется по группе изменяемого
 
 
-* Team может быть БЕЗ учатсников
+* Team может быть БЕЗ участников
   * -> отдельная структура Team
   * -> /team/get может выдать CODE 200 и пустой массив
 * В команде может быть ЛЮБОЕ количество участников

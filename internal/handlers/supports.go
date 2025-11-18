@@ -18,6 +18,9 @@ type TeamResponse struct {
 type UserResponse struct {
 	User dto.User `json:"user"`
 }
+type PullRequestsShort struct {
+	PullRequestsShort []dto.PullRequestShort `json:"pull_requests"`
+}
 
 func FromTeamDTOToTeam(dto dto.Team) (domain.Team, error) {
 	var tmpTeam domain.Team

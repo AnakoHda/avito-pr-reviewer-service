@@ -50,5 +50,33 @@ func (h *Handler) POSTSetIsActiveUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GETGetReviewUser(w http.ResponseWriter, r *http.Request) {
+	slog.Info("Touch GET USERS Reviews")
+	userId := r.URL.Query().Get("user_id")
+	if userId == "" {
+		handlers.ResponseFormatError(w, http.StatusBadRequest, handlers.ErrBadRequest, "Decode error")
+		return
+	}
+	ctx := r.Context()
+	massPR, err := h.svc.GetReview(ctx, domain.UserId(userId))
+	if err != nil {
+		if err.Error() == domain.ErrUserNotFound.Error() {
+			handlers.ResponseFormatError(w, http.StatusNotFound, dto.NOTFOUND, "resource not found")
+			return
+		}
+		handlers.ResponseFormatError(w, http.StatusInternalServerError, handlers.ErrInternal, "service error")
+		return
+	}
 
+	var res handlers.PullRequestsShort
+	res.PullRequestsShort = make([]dto.PullRequestShort, 0, len(massPR))
+	for _, pr := range massPR {
+		res.PullRequestsShort = append(res.PullRequestsShort, dto.PullRequestShort{
+			PullRequestId:   string(pr.PullRequestId),
+			PullRequestName: pr.PullRequestName,
+			AuthorId:        string(pr.AuthorId),
+			Status:          dto.PullRequestShortStatus(pr.Status),
+		})
+	}
+	handlers.ResponseFormatOK(w, http.StatusOK, res)
+	return
 }
