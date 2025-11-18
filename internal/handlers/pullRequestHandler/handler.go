@@ -127,12 +127,12 @@ func (h *Handler) POSTReassignPullRequest(w http.ResponseWriter, r *http.Request
 			handlers.ResponseFormatError(w, http.StatusConflict, dto.PRMERGED, "cannot reassign on merged PR")
 			return
 		}
-		if err.Error() == domain.ErrAuthorCannotBeReviewer.Error() {
-			handlers.ResponseFormatError(w, http.StatusInternalServerError, dto.NOTASSIGNED, "reviewer is not assigned to this PR")
+		if err.Error() == domain.ErrAuthorCannotBeReviewer.Error() || err.Error() == domain.ErrNotFoundReviewerInPullRequest.Error() {
+			handlers.ResponseFormatError(w, http.StatusConflict, dto.NOTASSIGNED, "reviewer is not assigned to this PR")
 			return
 		}
 		if err.Error() == domain.ErrNoCandidatesInTeam.Error() {
-			handlers.ResponseFormatError(w, http.StatusInternalServerError, dto.NOCANDIDATE, "no active replacement candidate in team")
+			handlers.ResponseFormatError(w, http.StatusConflict, dto.NOCANDIDATE, "no active replacement candidate in team")
 			return
 		}
 

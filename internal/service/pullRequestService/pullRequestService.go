@@ -106,6 +106,9 @@ func (s *Service) Reassign(ctx context.Context, pullRequestID domain.PullRequest
 			continue
 		}
 		if err := foundedPR.ReplaceReviewer(oldReviewerId, user.UserId); err != nil {
+			if err.Error() == domain.ErrNotFoundReviewerInPullRequest.Error() {
+				return nil, nil, domain.ErrNotFoundReviewerInPullRequest
+			}
 			continue
 		}
 		if err := s.prRepo.UpdatePullRequest(ctx, *foundedPR); err != nil {
