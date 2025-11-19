@@ -6,6 +6,14 @@
 > ⚠️ **Внимание!** Этот сервис находится в разработке!!
 ### реализованные ручки: 
 * /team/add
+* /team/get
+
+* /users/setIsActive
+* /users/getReview
+
+* /pullRequest/create
+* /pullRequest/merge
+* /pullRequest/reassign
 
 ***
 
